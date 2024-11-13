@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph Network</title>
+    
+    <!-- SEO Metadata -->
+    <meta name="description" content="Interactive visualization of a graph network of nodes and edges with Vis.js.">
+    <meta name="keywords" content="graph, network, nodes, edges, visualization, Vis.js, JavaScript">
+    <meta name="author" content="Your Name">
+
+    <!-- Open Graph Metadata for social media sharing -->
+    <meta property="og:title" content="Graph Network of Nodes and Edges">
+    <meta property="og:description" content="Interactive visualization of a graph network with Vis.js.">
+    <meta property="og:image" content="URL_of_your_illustrative_image">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="URL_of_your_page">
+
+    <!-- Twitter Metadata -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Graph Network of Nodes and Edges">
+    <meta name="twitter:description" content="Explore an interactive network of nodes and edges with Vis.js.">
+    <meta name="twitter:image" content="URL_of_your_illustrative_image">
+
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/vis-network@9.1.0/styles/vis-network.min.css" rel="stylesheet" type="text/css" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Audiowide&family=Monsieur+La+Doulaise&display=swap');
+        
+        /* Conteneur principal avec une division 70/30 */
+        .container {
+            display: flex;
+            width: 100%;
+        }
+
+        /* Section pour le réseau (70% de la largeur) */
+        #network {
+            flex: 7;
+            height: 90vh;
+            border: 1px solid lightgray;
+        }
+
+        /* Section pour les informations (30% de la largeur) */
+        #info {
+            flex: 3;
+            padding: 20px;
+            background-color: #f4f4f4;
+            border-left: 1px solid lightgray;
+        }
+
+        /* S'assurer que les éléments sont bien alignés */
+        .container > div {
+            height: 100%;
+        }
+
+        /* Style du titre */
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+            font-family: 'Audiowide', cursive;
+        }
+    </style>
+</head>
+<body>
+    <h1>RAT2P</h1>
+    <div class="container">
+        <!-- Conteneur pour le réseau -->
+        <div id="network"></div>
+
+        <!-- Conteneur pour les informations -->
+        <div id="info">
+            <h2>Information</h2>
+            <div id="startNodeInfo">
+                <p><strong>Start Node:</strong> <span id="startNodeLabel">None</span></p>
+            </div>
+            <div id="endNodeInfo">
+                <p><strong>End Node:</strong> <span id="endNodeLabel">None</span></p>
+            </div>
+            <div id="pathInfo">
+                <p><strong>Path:</strong> <span id="pathLabel">No path found</span></p>
+            </div>
+            <div id="time">
+                <strong>Time:</strong> <span id="timeLabel">0</span> seconds (<span id="timeMinutes">0</span> minutes)
+                <br> <!-- Retour à la ligne -->
+                <strong>Time with Changes <em>(2 minutes for each change)</em>:</strong> <span id="timeLabelChanges">0</span> seconds (<span id="timeMinutesChanges">0</span> minutes)
+            </div>
+            
+        </div>
+    </div>
+
+    <script src="graph.js"></script>
+</body>
+
+
+
+
+</html>

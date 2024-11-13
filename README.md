@@ -1,0 +1,1 @@
+Pour executer ce programme faites `node ./server.js` dans le répertoire root *(./RAT2P)* 
