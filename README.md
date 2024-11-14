@@ -1,1 +1,4 @@
-Pour executer ce programme faites `node ./server.js` dans le répertoire root *(./RAT2P)* 
+Pour executer ce programme: 
+- Aller dans le repertoire parent
+- Executer `npm i` (assurer vous d'avoir node d'installer)
+- Executer `node ./server.js`
