@@ -1,82 +1,198 @@
+/**
+ * 
+ * @file graph.js
+ * @module graph
+ * @description Contains classes and functions to manage graphs
+ * @requires vis
+ * @requires Node
+ * @requires Edge
+ * @Teravla
+ * @version 1.0.0
+ * 
+ */
+
+
+
+
+/**
+ * 
+ * @class
+ * @name Graph
+ * @description Represents a graph with nodes and edges
+ * 
+ */
 class Graph {
+    /**
+     * 
+     * Create a new graph
+     * @constructor
+     * @param {Array} nodes - List of nodes in the graph
+     * @param {Array} edges - List of edges in the graph
+     * @param {Node} selectedStartNode - The currently selected start node
+     * @param {Object} nodeMap - A map of labels to node IDs
+     * @memberof Graph
+     * @instance
+     * @public
+     * @name Graph
+     * @see Node
+     * @see Edge
+     * @example
+     * const graph = new Graph(nodes, edges, selectedStartNode, nodeMap);
+     * @description Create a new graph
+     * 
+     */
     constructor() {
         this.nodes = [];
         this.edges = [];
         this.selectedStartNode = null;
-        this.nodeMap = {};  // Ajoutez un nodeMap pour associer les étiquettes aux IDs
+        this.nodeMap = {};  // Add a node map to store the label and ID
     }
 
+    /**
+     * 
+     * Add a node to the graph
+     * @param {Node} node 
+     * @returns {Graph}
+     * @memberof Graph
+     * @instance
+     * @method
+     * @public
+     * @chainable
+     * @name addNode
+     * @example
+     * @see Node
+     * graph.addNode(node);
+     * @description Add a node to the graph
+     * 
+     */
     addNode(node) {
         this.nodes.push(node);
-        this.nodeMap[node.label] = node.id;  // Mettez à jour le nodeMap avec l'étiquette du nœud et son ID
-
+        this.nodeMap[node.label] = node.id;  // Update the node map with the label and ID
     }
 
+    /**
+     * 
+     * Add an edge to the graph
+     * @param {Edge} edge
+     * @returns {Graph}
+     * @memberof Graph
+     * @instance
+     * @method
+     * @public
+     * @chainable
+     * @name addEdge
+     * @see Edge
+     * @example
+     * graph.addEdge(edge);
+     * @description Add an edge to the graph
+     * 
+    */
     addEdge(edge) {
         this.edges.push(edge);
-
     }
 
+    /**
+     * 
+     * @param {Node} startLabel 
+     * @param {Node} endLabel
+     * @param {Object} networkData
+     * @returns {Array}
+     * @memberof Graph
+     * @instance
+     * @method
+     * @public
+     * @name findShortestPath
+     * @see Node
+     * @see Edge
+     * @see printTime
+     * @see highlightPath
+     * @example
+     * graph.findShortestPath(startLabel, endLabel, networkData);
+     * @description Find the shortest path between two nodes in the graph using Bellman-Ford algorithm
+     * 
+     */
     findShortestPath(startLabel, endLabel, networkData) {
+        // Retrieve the IDs of the start and end nodes
         const startId = this.nodeMap[startLabel];
         const endId = this.nodeMap[endLabel];
     
+        // Validate the start and end nodes
         if (startId === undefined || endId === undefined) {
-            console.error("Invalid start or end node");
-            return null;
+            console.error("Invalid start or end node"); // Log an error if either node is invalid
+            return null; // Return null if the nodes are not valid
         }
     
-        const distances = {};
-        const predecessors = {};
+        // Initialize distances and predecessors
+        const distances = {}; // Dictionary to store distances from the start node
+        const predecessors = {}; // Dictionary to store node predecessors
     
-        // Initialisation des distances
+        // Initialize distances to infinity and predecessors to null
         this.nodes.forEach(node => {
-            distances[node.id] = Infinity;
-            predecessors[node.id] = null;
+            distances[node.id] = Infinity; // Each node is initialized with an infinite distance
+            predecessors[node.id] = null; // No predecessor by default
         });
-        distances[startId] = 0;
+        distances[startId] = 0; // The distance from the start node to itself is 0
     
-        // Relaxation des arêtes
+        // Edge relaxation loop (|V| - 1) times
         for (let i = 0; i < this.nodes.length - 1; i++) {
             this.edges.forEach(edge => {
+                // If the current distance + edge weight is less than the known distance, update it
                 if (distances[edge.from] + parseFloat(edge.label) < distances[edge.to]) {
-                    distances[edge.to] = distances[edge.from] + parseFloat(edge.label);
-                    predecessors[edge.to] = edge.from;
+                    distances[edge.to] = distances[edge.from] + parseFloat(edge.label); // Update distance
+                    predecessors[edge.to] = edge.from; // Update predecessor
                 }
             });
         }
     
-        // Vérification des cycles négatifs
+        // Check for negative-weight cycles
         for (const edge of this.edges) {
+            // If a further relaxation is possible, there is a negative-weight cycle
             if (distances[edge.from] + parseFloat(edge.label) < distances[edge.to]) {
-                console.error("Graph contains a negative-weight cycle");
-                return null;
+                console.error("Graph contains a negative-weight cycle"); // Log an error if a cycle is detected
+                return null; // Return null to indicate failure
             }
         }
     
-        // Reconstruction du chemin
+        // Reconstruct the path from the end node to the start node
         const path = [];
         let currentNode = endId;
         while (currentNode !== null) {
-            path.unshift(currentNode);
-            currentNode = predecessors[currentNode];
+            path.unshift(currentNode); // Add the node to the path list
+            currentNode = predecessors[currentNode]; // Move to the next predecessor
         }
     
+        // If the reconstructed path does not start with the start node, no valid path exists
         if (path[0] !== startId) {
-            console.error("No path found");
-            return null;
+            console.error("No path found"); // Log an error if the path is invalid
+            return null; // Return null if no path is found
         }
     
+        // Display the time associated with the path
+        this.printTime(path); // Call a function to print the time (defined elsewhere)
     
-        this.printTime(path);
-        
+        // Highlight the path on the user interface
+        this.highlightPath(path, networkData); // Call a function to highlight the path (defined elsewhere)
     
-        this.highlightPath(path, networkData);
+        // Return the found path
         return path;
     }
-
+    
+    /**
+     * 
+     * @param {Array} path 
+     * @returns {void}
+     * @memberof Graph
+     * @instance
+     * @method
+     * @public
+     * @name printTime
+     * @example
+     * graph.printTime(path);
+     * @description Print the total time for the given path
+     * 
+     */
     printTime(path) {
-        // Calcul du temps total pour le chemin
+        // Calculate the total time for the path
         let totalTime = 0;
         for (let i = 0; i < path.length - 1; i++) {
             const from = path[i];
@@ -87,17 +203,31 @@ class Graph {
             }
         }
     
-        // Affichage du temps en secondes
+        // Display the time in seconds
         console.log(`Total time for the path: ${totalTime.toFixed(2)} seconds`);
     
-        // Mise à jour de l'affichage du temps dans la page
+        // Updating time display on the page
         document.getElementById('timeLabel').textContent = totalTime.toFixed(2);
         document.getElementById('timeMinutes').textContent = (totalTime / 60).toFixed(2);
     }
     
-    
+    /**
+     * 
+     * @param {Array} path
+     * @param {Number} numberOfChanges
+     * @returns {void}
+     * @memberof Graph
+     * @instance
+     * @method
+     * @public
+     * @name printTimeWithChanges
+     * @example
+     * graph.printTimeWithChanges(path, numberOfChanges);
+     * @description Print the total time for the given path with the specified number of changes
+     * 
+     */
     printTimeWithChanges(path, numberOfChanges) {
-        // Calcul du temps total pour le chemin
+        // Calculate the total time for the path with changes
         let totalTime = 0;
         for (let i = 0; i < path.length - 1; i++) {
             const from = path[i];
@@ -108,47 +238,235 @@ class Graph {
             }
         }
     
-        totalTime += numberOfChanges * 2 * 60; // Ajouter 2 minutes pour chaque changement de ligne
+        totalTime += numberOfChanges * 2 * 60; // Add 2 minutes for each line change
     
-        // Affichage du temps en secondes
+        // Display the time in seconds
         console.log(`Total time for the path: ${totalTime.toFixed(2)} seconds`);
     
-        // Mise à jour de l'affichage du temps dans la page
+        // Updating time display on the page
         document.getElementById('timeLabelChanges').textContent = totalTime.toFixed(2);
         document.getElementById('timeMinutesChanges').textContent = (totalTime / 60).toFixed(2);
     }
     
-
+    /**
+     * 
+     * @param {Array} path
+     * @param {Object} networkData
+     * @returns {void}
+     * @memberof Graph
+     * @instance
+     * @method
+     * @public
+     * @name highlightPath
+     * @example
+     * graph.highlightPath(path, networkData);
+     * @description Highlight the specified path on the graph
+     * 
+     */
     highlightPath(path, networkData) {
-        // Met en surbrillance le chemin sélectionné
+        // Highlights the selected path
         for (let i = 0; i < path.length - 1; i++) {
             const from = path[i];
             const to = path[i + 1];
             this.edges.forEach(edge => {
                 if ((edge.from === from && edge.to === to) || (edge.from === to && edge.to === from)) {
-                    edge.color = '#0000ff'; // Bleu pour le chemin
+                    edge.color = '#0000ff'; // Blue for the path
                     const edgeData = networkData.edges.get(edge.id);
                     if (edgeData) {
-                        edgeData.color = '#0000ff'; // Changer la couleur de l'arête
-                        networkData.edges.update(edgeData); // Mettre à jour l'arête
+                        edgeData.color = '#0000ff'; // Change the color of the edge
+                        networkData.edges.update(edgeData); // Update
                     }
                 }
             });
         }
     }
 
+    /**
+     * 
+     * @param {Object} networkData 
+     * @returns {void}
+     * @memberof Graph
+     * @instance
+     * @method
+     * @public
+     * @name resetColors
+     * @example
+     * graph.resetColors(networkData);
+     * @description Reset the colors of all edges in the graph
+     * 
+     */
     resetColors(networkData) {
-        // Créer une liste des mises à jour en une seule fois pour améliorer les performances
+        // Create a list of updates in one go to improve performance
         const updates = this.edges.map(edge => {
             return { id: edge.id, color: '#000000' }; // Noir par défaut
         });
     
-        // Effectuer une mise à jour en masse pour réduire le nombre d'opérations
+        // Perform a mass update to reduce the number of operations
         networkData.edges.update(updates);
     }
 }
 
 
+/**
+ * 
+ * @class
+ * @name Node
+ * @description Represents a node in a graph
+ * 
+ */
+class Node {
+    /**
+     * 
+     * @param {String} name - The name of the node
+     * @param {String} colorborder - The color of the node border
+     * @param {String} colorbackground - The color of the node background
+     * @returns {Node}
+     * @memberof Node
+     * @instance
+     * @public
+     * @constructor
+     * @name Node
+     * @example
+     * const node = new Node(name, colorborder, colorbackground);
+     * @description Create a new node
+     * 
+     */
+    constructor(name, colorborder, colorbackground) {
+        this.id = Node.generateId();
+        this.label = name;
+        this.shape = 'dot';
+        this.size = 10;
+        this.color = { background: colorbackground, border: colorborder };
+        this.lineCount = 1; // Compteur initialisé à 1
+        this.lines = []; // Nouveau tableau pour stocker les lignes desservant ce nœud
+    }
+
+    /**
+     * 
+     * @returns {Number}
+     * @memberof Node
+     * @instance
+     * @public
+     * @static
+     * @name generateId
+     * @example
+     * Node.generateId();
+     * @description Generate a unique ID for a node
+     * 
+     */
+    static generateId() {
+        if (!Node.idCounter) Node.idCounter = 0;
+        return Node.idCounter++;
+    }
+
+    /**
+     * 
+     * @returns {void}
+     * @memberof Node
+     * @instance
+     * @public
+     * @method
+     * @name incrementLineCount
+     * @example
+     * node.incrementLineCount();
+     * @description Increment the line count for the node
+     * 
+     */
+    incrementLineCount() {
+        this.lineCount += 1;
+    }
+
+    /**
+     * 
+     * @param {String} line - The line to add to the node
+     * @returns {void}
+     * @memberof Node
+     * @instance
+     * @public
+     * @method
+     * @name addLine
+     * @example
+     * node.addLine(line);
+     * @description Add a line to the node
+     * 
+     */
+    addLine(line) {
+        if (!this.lines.includes(line)) {
+            this.lines.push(line);
+        }
+    }
+}
+
+
+/**
+ * 
+ * @class
+ * @name Edge
+ * @description Represents an edge in a graph
+ * 
+ */
+class Edge {
+    /**
+     * 
+     * @param {String} from - The ID of the starting node
+     * @param {String} to - The ID of the ending node 
+     * @param {String} time - The time to traverse the edge
+     * @returns {Edge}
+     * @memberof Edge
+     * @instance
+     * @public
+     * @constructor
+     * @name Edge
+     * @example
+     * const edge = new Edge(from, to, time);
+     * @description Create a new edge
+     * 
+     */
+    constructor(from, to, time) {
+        this.from = from;
+        this.to = to;
+        this.label = time;
+        this.width = 2;
+        this.color = { color: '#000', highlight: '#ff0000' };
+        this.smooth = { type: 'continuous', forceDirection: 'none' };
+    }
+
+    /**
+     * 
+     * @param {Boolean} isDirected - Whether the edge is directed or not
+     * @returns {void}
+     * @memberof Edge
+     * @instance
+     * @public
+     * @method
+     * @name setDirection
+     * @example
+     * edge.setDirection(isDirected);
+     * @description Set the direction of the edge
+     * 
+     */
+    setDirection(isDirected) {
+        if (isDirected) {
+            this.arrows = { to: { enabled: true, scaleFactor: 0.5 } };
+        }
+    }
+}
+
+
+/**
+ * 
+ * @param {Object} params - The parameters of the click event, including the selected nodes.
+ * @param {Graph} graph - The graph object that contains nodes and methods for pathfinding.
+ * @param {Object} networkData - The data representing the structure and connections of the network.
+ * @returns {void}
+ * 
+ * @throws {Error} Will log an error if the selected node is not found in the graph or if no path could be found.
+ * 
+ * @example
+ * handleNodeClick({ nodes: [1] }, graphInstance, networkData);
+ * @description Handles the click event on a node in the graph visualization.
+ * 
+ */
 function handleNodeClick(params, graph, networkData) {
     if (params.nodes.length > 0) {
         const selectedNodeId = params.nodes[0];
@@ -215,14 +533,14 @@ function handleNodeClick(params, graph, networkData) {
                                 numberOfChanges += 1;
                             }
                         } else {
-                            // Ajout du dernier arrêt
+                            // Adding the last stop
                             listItem.innerHTML = `<strong>${currentNode.label}</strong> <em>(${currentStopLines.join(', ')})</em>`;
                         }
                     
                         pathList.appendChild(listItem);
                     }
                     
-                    // Mise à jour du label du chemin
+                    // Update of the path of the path
                     const pathLabel = document.getElementById('pathLabel');
                     pathLabel.innerHTML = '';
                     pathLabel.appendChild(pathList);
@@ -239,89 +557,29 @@ function handleNodeClick(params, graph, networkData) {
 }
 
 
-function printTimeWithChanges(path, numberOfChanges) {
-    // Calcul du temps total pour le chemin
-    let totalTime = 0;
-    for (let i = 0; i < path.length - 1; i++) {
-        const from = path[i];
-        const to = path[i + 1];
-        const edge = this.edges.find(e => e.from === from && e.to === to);
-        if (edge) {
-            totalTime += parseFloat(edge.label);
-        }
-    }
 
-    totalTime += numberOfChanges * 2 * 60; // Ajouter 2 minutes pour chaque changement de ligne
-
-    // Affichage du temps en secondes
-    console.log(`Total time for the path: ${totalTime.toFixed(2)} seconds`);
-
-    // Mise à jour de l'affichage du temps dans la page
-    document.getElementById('timeLabelChanges').textContent = totalTime.toFixed(2);
-    document.getElementById('timeMinutesChanges').textContent = (totalTime / 60).toFixed(2);
-}
-
-
-
-
-
-
-
-
-// Classe pour gérer les nœuds
-class Node {
-    constructor(name, colorborder, colorbackground) {
-        this.id = Node.generateId();
-        this.label = name;
-        this.shape = 'dot';
-        this.size = 10;
-        this.color = { background: colorbackground, border: colorborder };
-        this.lineCount = 1; // Compteur initialisé à 1
-        this.lines = []; // Nouveau tableau pour stocker les lignes desservant ce nœud
-    }
-
-    static generateId() {
-        if (!Node.idCounter) Node.idCounter = 0;
-        return Node.idCounter++;
-    }
-
-    incrementLineCount() {
-        this.lineCount += 1;
-    }
-
-    // Ajout d'une méthode pour ajouter une ligne au nœud
-    addLine(line) {
-        if (!this.lines.includes(line)) {
-            this.lines.push(line);
-        }
-    }
-}
-
-
-// Classe pour gérer les arêtes
-class Edge {
-    constructor(from, to, time) {
-        this.from = from;
-        this.to = to;
-        this.label = time;
-        this.width = 2;
-        this.color = { color: '#000', highlight: '#ff0000' };
-        this.smooth = { type: 'continuous', forceDirection: 'none' };
-    }
-
-    setDirection(isDirected) {
-        if (isDirected) {
-            this.arrows = { to: { enabled: true, scaleFactor: 0.5 } };
-        }
-    }
-}
-
-// Fonction pour récupérer les données
+/**
+ * 
+ * @returns {Promise}
+ * @example
+ * fetchData();
+ * @description Fetch data from the server
+ * 
+ */
 async function fetchData() {
     const response = await fetch('/data');
     return response.json();
 }
 
+
+/**
+ * 
+ * @returns {void}
+ * @example
+ * createNetwork();
+ * @description Create the network visualization
+ * 
+ */
 async function createNetwork() {
     const data = await fetchData();
     const nodeMap = {};
@@ -330,39 +588,39 @@ async function createNetwork() {
     const addedEdges = new Set();
     const graph = new Graph();
 
-    // Création des nœuds et gestion des couleurs
-data.sommets.forEach(sommet => {
-    const name = sommet.Nom;
-    const colorBorder = "#" + sommet.Color;
-    const colorBackground = "#" + sommet.Color; // On utilise la même couleur pour le fond et la bordure au départ
+    // Creation of nodes and color management
+    data.sommets.forEach(sommet => {
+        const name = sommet.Nom;
+        const colorBorder = "#" + sommet.Color;
+        const colorBackground = "#" + sommet.Color; // We use the same color for the bottom and the border at the start
 
-    let node;
+        let node;
 
-    if (!nodeMap[name]) {
-        // Création d'un nouveau nœud avec la couleur de bordure et la couleur de fond
-        node = new Node(name, colorBorder, colorBackground);
-        nodeMap[name] = node.id;
-        nodes.push(node);
-        graph.addNode(node);
-    } else {
-        // Si le nœud existe déjà, on le trouve dans la liste des nœuds
-        node = nodes.find(n => n.label === name);
-        if (node) {
-            node.incrementLineCount();
-            if (!colorMap[name]) {
-                colorMap[name] = [];
+        if (!nodeMap[name]) {
+            // Creation of a new node with the border color and the background color
+            node = new Node(name, colorBorder, colorBackground);
+            nodeMap[name] = node.id;
+            nodes.push(node);
+            graph.addNode(node);
+        } else {
+            // If the node already exists, it is found in the list of nodes
+            node = nodes.find(n => n.label === name);
+            if (node) {
+                node.incrementLineCount();
+                if (!colorMap[name]) {
+                    colorMap[name] = [];
+                }
+                colorMap[name].push(colorBorder);
             }
-            colorMap[name].push(colorBorder);
         }
-    }
 
-    if (node) {
-        node.addLine(sommet.Line);
-    }
-});
+        if (node) {
+            node.addLine(sommet.Line);
+        }
+    });
 
 
-    // Mise à jour des couleurs des nœuds en fonction du nombre de lignes
+    // Updating the colors of the nodes as a function of the number of lines
     nodes.forEach(node => {
         if (node.lineCount >= 2) {
             node.color.background = 'white';
@@ -373,7 +631,7 @@ data.sommets.forEach(sommet => {
         }
     });
 
-    // Création des arêtes
+    // Creation of edges
     const edges = data.aretes.map(arete => {
         const from = nodeMap[data.sommets.find(s => s.ID === arete.Sommet1).Nom];
         const to = nodeMap[data.sommets.find(s => s.ID === arete.Sommet2).Nom];
@@ -395,7 +653,7 @@ data.sommets.forEach(sommet => {
         return edge;
     }).filter(edge => edge !== null);
 
-    // Initialisation du réseau
+    // Network initialization
     const container = document.getElementById('network');
     const networkData = {
         nodes: new vis.DataSet(nodes),
@@ -425,7 +683,7 @@ data.sommets.forEach(sommet => {
     const network = new vis.Network(container, networkData, options);
 
     network.on("click", function (params) {
-        handleNodeClick(params, graph, networkData); // Passer networkData ici aussi
+        handleNodeClick(params, graph, networkData); // Pass NetworkData here too
     });
 }
 

@@ -2,30 +2,30 @@ import csv
 import os
 from collections import Counter
 
-# Changer le répertoire de travail
+# Change The Work Directory
 os.chdir('data')
 
-# Ouvrir le fichier RawData.txt et lire son contenu
+# Open the Rawdata.txt File and Read Its Happy
 with open('./RawData.txt', 'r', encoding='utf-8') as file:
     raw_data = file.readlines()
 
-    # Liste pour stocker les sommets et les arêtes
+    # List to store Nodes and Edges
     sommet_data = []
     arete_data = []
-    nom_counter = Counter()  # Dictionnaire pour compter les apparitions des noms de sommets
+    nom_counter = Counter()  # Dictionary to count the appearances of summary names
 
-    # Traitement des lignes du fichier
+    # File Line Processing
     for line in raw_data:
         line = line.strip()
         if line.startswith("V"):
-            # Si la ligne commence par "V", traiter comme un sommet
+            # If the Line Begins with "V", Treat Like A Node
             parts = line.split(";")
             sommet_data.append([parts[1], parts[2], parts[3], parts[4]])  # Ajouter l'ID, le nom, etc.
 
-            # Compter l'apparition du nom du sommet
-            nom_counter[parts[2]] += 1  # parts[2] correspond au "Nom"
+            # Count the appearance of the Node Name
+            nom_counter[parts[2]] += 1  # Shares [2] corresponds to "name"
 
-            # Ajout des couleurs
+            # Adding Colors
             color_dict = {
                 "1": "fecd08",
                 "2": "006db8",
@@ -47,31 +47,31 @@ with open('./RawData.txt', 'r', encoding='utf-8') as file:
             if parts[3] in color_dict:
                 sommet_data[-1].append(color_dict[parts[3]])
         elif line.startswith("E"):
-            # Si la ligne commence par "E", traiter comme une arête
+            # If the line starts with "e", treat like an edge
             parts = line.split(" ")
-            sommet1 = parts[1].zfill(4)  # Mettre sommet1 à 4 chiffres
-            sommet2 = parts[2].zfill(4)  # Mettre sommet2 à 4 chiffres
+            sommet1 = parts[1].zfill(4)  # Summary 1 to 4 Digits
+            sommet2 = parts[2].zfill(4)  # Node 2 to 4 Digits
 
-            # Ignorer les arêtes avec temps = 0
+            # Ignore the edges with time = 0
             if parts[3] in ["0", "0.0", 0, 0.0]:
                 print(f"Arête ignorée: {sommet1} -> {sommet2} (temps = 0)")
                 continue
 
-            # Ajouter l'arête avec l'ID formaté et le temps
+            # Add the edge with the formatted id and time
             arete_data.append([sommet1, sommet2, parts[3]])
 
-# Ajouter le comptage à chaque entrée de sommet
+# Add the Count to each top input
 for sommet in sommet_data:
-    nom = sommet[1]  # Nom du sommet
-    sommet.append(nom_counter[nom])  # Ajouter le nombre de lignes au champ NumberOfLine
+    nom = sommet[1]  # Node Name
+    sommet.append(nom_counter[nom])  #Add the Number of Lines to the Numberofline Field
 
-# Écriture des sommets dans le fichier Sommet.csv avec séparateur ";"
+# Writing Nodes in The Node.csv File with separator ";"
 with open('Sommet.csv', mode='w', newline='', encoding='utf-8') as sommet_file:
     sommet_writer = csv.writer(sommet_file, delimiter=';')
     sommet_writer.writerow(["ID", "Nom", "Line", "IsTerminus", "Color", "NumberOfLine"])  # Écrire l'entête
     sommet_writer.writerows(sommet_data)
 
-# Écriture des arêtes dans le fichier Aretes.csv avec séparateur ";"
+# Writing Edges in the Aretes.csv File with separator ";"
 """
 Ouvrir le fichier Sommet.csv en mode ecriture
 Compter le nombre de fois où apparait un sommet basé sur "Nom"
@@ -79,8 +79,8 @@ Mettre NumberOfLine à 1 si le sommet n'apparait qu'une fois, 2 si le sommet app
 """
 with open('Aretes.csv', mode='w', newline='', encoding='utf-8') as arete_file:
     arete_writer = csv.writer(arete_file, delimiter=';')
-    arete_writer.writerow(["Sommet1", "Sommet2", "Time"])  # Écrire l'entête
-    arete_writer.writerows(arete_data)  # Écrire les données
+    arete_writer.writerow(["Sommet1", "Sommet2", "Time"])  # Write the Header
+    arete_writer.writerows(arete_data)  # Write Data
 
 
 

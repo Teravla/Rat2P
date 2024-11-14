@@ -8,11 +8,11 @@ const path = require('path');
 const app = new Koa();
 const router = new Router();
 
-// Chemin vers les fichiers CSV
+// Path to CSV files
 const sommetFilePath = path.join('./data', 'Sommet.csv');
 const areteFilePath = path.join('./data', 'Aretes.csv');
 
-// Fonction pour lire un fichier CSV et le convertir en JSON
+// Function to read a CSV file and convert it to JSON
 function readCSV(filePath) {
     return new Promise((resolve, reject) => {
         const results = [];
@@ -24,7 +24,7 @@ function readCSV(filePath) {
     });
 }
 
-// Route pour obtenir les sommets et arêtes
+// Road to obtain the summits and edges
 router.get('/data', async (ctx) => {
     try {
         const sommets = await readCSV(sommetFilePath);
@@ -37,13 +37,13 @@ router.get('/data', async (ctx) => {
     }
 });
 
-// Serveur de fichiers statiques pour le dossier /public
+// Static file server for folder /audience
 app.use(koaStatic(path.join(__dirname, 'src')));
 
-// Utilisation du routeur
+// Use of the Router
 app.use(router.routes()).use(router.allowedMethods());
 
-// Lancer le serveur
+// Launch The Server
 app.listen(3000, () => {
     console.log('Serveur démarré sur http://localhost:3000');
 });
